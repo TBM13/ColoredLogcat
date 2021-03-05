@@ -18,13 +18,10 @@
 
 # Color coded logcat script to highlight adb logcat output for console.
 
-import cStringIO
-import fcntl
+import io
 import os
 import re
-import struct
 import sys
-import termios
 
 # pattern to extract data from log
 # the pattern currently conforms to the log output received from
@@ -112,8 +109,9 @@ def extractPID(package):
 
 def main():
     # unpack the current terminal width/height
-    data = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, '1234')
-    height, width = struct.unpack('hh', data)
+    terminalSize = os.get_terminal_size()
+    height = terminalSize.lines
+    width = terminalSize.columns
 
     retag = re.compile(PATTERN)
     pid = None
@@ -137,8 +135,8 @@ def main():
                 break
         except KeyboardInterrupt:
             break
-        except Exception, err:
-            print err
+        except Exception as err:
+            print(err)
             break
         else:
             match = retag.match(line)
@@ -148,14 +146,14 @@ def main():
                 if pid and procID != pid:
                     continue
 
-                linebuf = cStringIO.StringIO()
+                linebuf = io.StringIO()
                 linebuf.write(format(timestamp, WIDTH_TIMESTAMP, LOG_TIMESTAMP, 'center') + " ")
                 linebuf.write(format(procID, WIDTH_PID, LOG_PROCESS, 'center') + " ")
                 linebuf.write(format(tag.strip()[-WIDTH_TAG:], WIDTH_TAG, get_color(tag), 'right') + " ")
                 linebuf.write(format(tagtype, WIDTH_LOG_LEVEL, LOG_LEVEL_FORMATTING[tagtype], 'center') + " ")
                 wrap_text(message, linebuf, HEADER_SIZE + 1, width)
 
-                print linebuf.getvalue()
+                print(linebuf.getvalue())
                 linebuf.close()
         finally:
             if proc:
