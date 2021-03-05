@@ -29,22 +29,29 @@ import sys
 PATTERN = "^(\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}\.\d{3}) ([VDIWE])\/(.*)(\(\s*\d+\)):(.*)$"
 
 # formatting properties
-LOG_LEVEL_VERBOSE = '\033[38;5;225;48;5;8m'
-LOG_LEVEL_INFO = '\033[0;30;48;5;119m'
-LOG_LEVEL_DEBUG = '\033[0;30;48;5;45m'
-LOG_LEVEL_WARNING = '\033[0;30;48;5;229m'
-LOG_LEVEL_ERROR = '\033[38;5;225;48;5;196m'
-LOG_PROCESS = '\033[0;38;5;244;48;5;236m'
-LOG_TAG = '\033[0;38;5;%dm'
-LOG_TIMESTAMP = '\033[0;38;5;235m'
+
+LOG_LEVEL_VERBOSE = '\033[0;38;5;255;48;5;36m'
+LOG_LEVEL_VERBOSE_TEXT = "\033[0;38;5;36m"
+LOG_LEVEL_INFO = '\033[0;38;5;255;48;5;40m'
+LOG_LEVEL_INFO_TEXT = "\033[0;38;5;40m"
+LOG_LEVEL_DEBUG = '\033[0;38;5;255;48;5;33m'
+LOG_LEVEL_DEBUG_TEXT = "\033[0;38;5;33m"
+LOG_LEVEL_WARNING = '\033[0;38;5;255;48;5;208m'
+LOG_LEVEL_WARNING_TEXT = "\033[0;38;5;208m"
+LOG_LEVEL_ERROR = '\033[0;38;5;255;48;5;124m'
+LOG_LEVEL_ERROR_TEXT = "\033[0;38;5;124m"
+LOG_LEVEL_FATAL = '\033[0;38;5;255;48;5;196m'
+LOG_LEVEL_FATAL_TEXT = '\033[0;38;5;196m'
+LOG_PROCESS = '\033[0;38;5;36;48;5;236m'
+LOG_TAG = '\033[0;38;5;255m'
+LOG_TIMESTAMP = '\033[0;38;5;134m'
 RESET = '\033[0m'
 
 # column widths
 WIDTH_LOG_LEVEL = 3
-WIDTH_TAG = 25
-WIDTH_PID = 7
+WIDTH_PID = 6
 WIDTH_TIMESTAMP = 12
-HEADER_SIZE = WIDTH_TIMESTAMP + 1 + WIDTH_PID + 1 + WIDTH_TAG + 1 + WIDTH_LOG_LEVEL + 1
+HEADER_SIZE = WIDTH_TIMESTAMP + 1 + WIDTH_PID + 1 + WIDTH_LOG_LEVEL + 1
 
 # log level formatting
 LOG_LEVEL_FORMATTING = {
@@ -52,33 +59,29 @@ LOG_LEVEL_FORMATTING = {
     'I': LOG_LEVEL_INFO,
     'D': LOG_LEVEL_DEBUG,
     'W': LOG_LEVEL_WARNING,
-    'E': LOG_LEVEL_ERROR
+    'E': LOG_LEVEL_ERROR,
+    "F": LOG_LEVEL_FATAL
 }
 
-# tag colors
-TAG_COLORS = [ 226, 10, 213, 203, 199, 195, 190, 160, 105, 87, 220, 75, 39, 13, 11 ]
-
-# color cache
-tag_color_cache = dict()
-color_index = 0
+LOG_LEVEL_FORMATTING_TEXT = {
+    'V': LOG_LEVEL_VERBOSE_TEXT,
+    'I': LOG_LEVEL_INFO_TEXT,
+    'D': LOG_LEVEL_DEBUG_TEXT,
+    'W': LOG_LEVEL_WARNING_TEXT,
+    'E': LOG_LEVEL_ERROR_TEXT,
+    "F": LOG_LEVEL_FATAL_TEXT
+}
 
 def format(text, width, format_prop=None, align='left'):
     if align == 'center':
         text = text.center(width)
     elif align == 'right':
         text = text.rjust(width)
+    elif align == 'left':
+        text = text.ljust(width)
     if format_prop:
         text = format_prop + text + RESET
     return text
-
-def get_color(tag):
-    color = tag_color_cache.get(tag)
-    if not color:
-        global color_index
-        color = LOG_TAG % TAG_COLORS[color_index]
-        color_index = (color_index + 1) % len(TAG_COLORS)
-        tag_color_cache[tag] = color
-    return color
 
 def wrap_text(text, buf, indent=0, width=80):
     text_length = len(text)
@@ -108,10 +111,8 @@ def extractPID(package):
         input.close()
 
 def main():
-    # unpack the current terminal width/height
-    terminalSize = os.get_terminal_size()
-    height = terminalSize.lines
-    width = terminalSize.columns
+    # get the current terminal width
+    width = os.get_terminal_size().columns
 
     retag = re.compile(PATTERN)
     pid = None
@@ -135,6 +136,8 @@ def main():
                 break
         except KeyboardInterrupt:
             break
+        except UnicodeError:
+            continue
         except Exception as err:
             print(err)
             break
@@ -146,12 +149,15 @@ def main():
                 if pid and procID != pid:
                     continue
 
+                tag = tag.strip()
+
                 linebuf = io.StringIO()
                 linebuf.write(format(timestamp, WIDTH_TIMESTAMP, LOG_TIMESTAMP, 'center') + " ")
                 linebuf.write(format(procID, WIDTH_PID, LOG_PROCESS, 'center') + " ")
-                linebuf.write(format(tag.strip()[-WIDTH_TAG:], WIDTH_TAG, get_color(tag), 'right') + " ")
                 linebuf.write(format(tagtype, WIDTH_LOG_LEVEL, LOG_LEVEL_FORMATTING[tagtype], 'center') + " ")
-                wrap_text(message, linebuf, HEADER_SIZE + 1, width)
+                linebuf.write(format(tag + ":", len(tag), LOG_TAG, '') + " ")
+                tagTypeFormatting = LOG_LEVEL_FORMATTING[tagtype] if tagtype == "F" else LOG_LEVEL_FORMATTING_TEXT[tagtype]
+                wrap_text(tagTypeFormatting + message + RESET, linebuf, HEADER_SIZE + 1 + len(tag) + 1, width)
 
                 print(linebuf.getvalue())
                 linebuf.close()
