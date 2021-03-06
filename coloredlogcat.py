@@ -26,20 +26,22 @@ import sys
 # pattern to extract data from log
 # the pattern currently conforms to the log output received from
 # adb 1.0.31
-PATTERN = "^(\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}\.\d{3}) ([VDIWEF])\/(.*)(\(\s*\d+\)):(.*)$"
+PATTERN = "^(\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}\.\d{3}) ([VDIWEFS])\/(.*)(\(\s*\d+\)):(.*)$"
 
 # formatting properties
 
+LOG_LEVEL_SILENT = '\033[0;38;5;255;48;5;248m'
+LOG_LEVEL_SILENT_TEXT = '\033[0;38;5;248m'
 LOG_LEVEL_VERBOSE = '\033[0;38;5;255;48;5;36m'
-LOG_LEVEL_VERBOSE_TEXT = "\033[0;38;5;36m"
+LOG_LEVEL_VERBOSE_TEXT = '\033[0;38;5;36m'
 LOG_LEVEL_INFO = '\033[0;38;5;255;48;5;40m'
-LOG_LEVEL_INFO_TEXT = "\033[0;38;5;40m"
+LOG_LEVEL_INFO_TEXT = '\033[0;38;5;40m'
 LOG_LEVEL_DEBUG = '\033[0;38;5;255;48;5;33m'
-LOG_LEVEL_DEBUG_TEXT = "\033[0;38;5;33m"
+LOG_LEVEL_DEBUG_TEXT = '\033[0;38;5;33m'
 LOG_LEVEL_WARNING = '\033[0;38;5;255;48;5;208m'
-LOG_LEVEL_WARNING_TEXT = "\033[0;38;5;208m"
+LOG_LEVEL_WARNING_TEXT = '\033[0;38;5;208m'
 LOG_LEVEL_ERROR = '\033[0;38;5;255;48;5;124m'
-LOG_LEVEL_ERROR_TEXT = "\033[0;38;5;124m"
+LOG_LEVEL_ERROR_TEXT = '\033[0;38;5;124m'
 LOG_LEVEL_FATAL = '\033[0;38;5;255;48;5;196m'
 LOG_LEVEL_FATAL_TEXT = '\033[0;38;5;196m'
 LOG_PROCESS = '\033[0;38;5;36;48;5;236m'
@@ -55,21 +57,23 @@ HEADER_SIZE = WIDTH_TIMESTAMP + 1 + WIDTH_PID + 1 + WIDTH_LOG_LEVEL + 1
 
 # log level formatting
 LOG_LEVEL_FORMATTING = {
+    'S': LOG_LEVEL_SILENT,
     'V': LOG_LEVEL_VERBOSE,
     'I': LOG_LEVEL_INFO,
     'D': LOG_LEVEL_DEBUG,
     'W': LOG_LEVEL_WARNING,
     'E': LOG_LEVEL_ERROR,
-    "F": LOG_LEVEL_FATAL
+    'F': LOG_LEVEL_FATAL
 }
 
 LOG_LEVEL_FORMATTING_TEXT = {
+    'S': LOG_LEVEL_SILENT_TEXT,
     'V': LOG_LEVEL_VERBOSE_TEXT,
     'I': LOG_LEVEL_INFO_TEXT,
     'D': LOG_LEVEL_DEBUG_TEXT,
     'W': LOG_LEVEL_WARNING_TEXT,
     'E': LOG_LEVEL_ERROR_TEXT,
-    "F": LOG_LEVEL_FATAL_TEXT
+    'F': LOG_LEVEL_FATAL_TEXT
 }
 
 def format(text, width, format_prop=None, align='left'):
