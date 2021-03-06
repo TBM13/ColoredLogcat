@@ -20,6 +20,7 @@
 
 import io
 import os
+import platform
 import re
 import shutil
 import sys
@@ -103,7 +104,11 @@ def wrap_text(text, buf, indent=0, width=80):
 def extractPID(package):
     # attempt to extract the process ID from adb shell
     # if there is no pid associated with the package name then return None
-    input = os.popen("adb shell ps | grep %s" % package)
+    if platform.system() == "Windows":
+        input = os.popen("adb shell ps | findstr %s" % package)
+    else:
+        input = os.popen("adb shell ps | grep %s" % package)
+
     try:
         line = input.readline()
     except:
