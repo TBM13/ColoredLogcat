@@ -26,7 +26,7 @@ import sys
 # pattern to extract data from log
 # the pattern currently conforms to the log output received from
 # adb 1.0.31
-PATTERN = "^(\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}\.\d{3}) ([VDIWE])\/(.*)(\(\s*\d+\)):(.*)$"
+PATTERN = "^(\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}\.\d{3}) ([VDIWEF])\/(.*)(\(\s*\d+\)):(.*)$"
 
 # formatting properties
 
@@ -43,7 +43,7 @@ LOG_LEVEL_ERROR_TEXT = "\033[0;38;5;124m"
 LOG_LEVEL_FATAL = '\033[0;38;5;255;48;5;196m'
 LOG_LEVEL_FATAL_TEXT = '\033[0;38;5;196m'
 LOG_PROCESS = '\033[0;38;5;36;48;5;236m'
-LOG_TAG = '\033[0;38;5;255m'
+LOG_TAG = '\033[0;38;5;255;48;5;236m'
 LOG_TIMESTAMP = '\033[0;38;5;134m'
 RESET = '\033[0m'
 
