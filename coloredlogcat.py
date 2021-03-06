@@ -21,6 +21,7 @@
 import io
 import os
 import re
+import shutil
 import sys
 
 # pattern to extract data from log
@@ -116,7 +117,7 @@ def extractPID(package):
 
 def main():
     # get the current terminal width
-    width = os.get_terminal_size().columns
+    width = shutil.get_terminal_size().columns
 
     retag = re.compile(PATTERN)
     pid = None
